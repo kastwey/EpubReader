@@ -33,7 +33,7 @@
 		const { ipcRenderer } = require("electron");
 
 		$(function () {
-			alert("cargado!");
+			// alert("cargado!");
 			$("#addBook").on("click", function (e) {
 				e.defaultPrevented = true;
 				ipcRenderer.send("select-file");

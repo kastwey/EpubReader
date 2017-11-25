@@ -7,6 +7,7 @@
 	<button class="btn btn-primary" id="btnExport">Exportar libro a texto plano</button>
 	<h3>Cap&iacute;tulos</h3>
 	@Html.Partial("_ChaptersList", Model.Chapters)
+	<p><a href="@Url.Action("Index", "Home")">Volver a la biblioteca</a></p>
 </div>
 
 @section scripts

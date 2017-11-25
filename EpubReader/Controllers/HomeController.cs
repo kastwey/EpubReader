@@ -14,7 +14,6 @@ using EpubReader.Extensions;
 using System.Text;
 using System.Web;
 using System.IO;
-using EpubReader.Listeners;
 
 namespace EpubReader.Controllers
 {
@@ -151,6 +150,12 @@ namespace EpubReader.Controllers
 				return NotFound("The book path was not found.");
 			}
 			var book = EpubReader.Library.EpubReader.ReadBook(path);
+			var bookFromLibrary = _bookRepository.GetAll().SingleOrDefault(b => b.Path.Equals(path, StringComparison.InvariantCultureIgnoreCase));
+			if (bookFromLibrary != null)
+			{
+				bookFromLibrary.LastOpened = DateTime.Now;
+				_bookRepository.Update(bookFromLibrary);
+			}
 			var bookModel = new Models.book
 			{
 				Title = book.Title,
@@ -234,29 +239,6 @@ namespace EpubReader.Controllers
 			}
 			return bookChapter.HtmlContent + Environment.NewLine +
 				"<p><a href=\"" + Url.Action("Read", "Home", new { path = path }) + "\">Volver al índice.</a></p>";
-		}
-		[HttpPost]
-		public IActionResult Export(string bookPath, string exportPath)
-		{
-			if (!System.IO.File.Exists(bookPath))
-			{
-				return NotFound("The book path was not found.");
-			}
-			var book = EpubReader.Library.EpubReader.ReadBook(bookPath);
-			var regex = new Regex(@"<[^>]*>", RegexOptions.IgnoreCase);
-			List<EpubChapter> allChapters = book.GetAllChapters();
-			string wholeBook = String.Join(Environment.NewLine, allChapters.Select(ch => {
-				return regex.Replace(ch.HtmlContent, String.Empty);
-			}).ToArray());
-			try
-			{
-				System.IO.File.WriteAllText(exportPath, wholeBook, Encoding.UTF8);
-				return Ok();
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex);
-			}
 		}
 
 
