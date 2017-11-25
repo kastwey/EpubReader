@@ -1,0 +1,62 @@
+﻿@using EpubReader.Data.Entities
+@model IEnumerable<Book>
+@{
+	ViewData["Title"] = "Biblioteca";
+}
+<p><a href="#" id="addBook" class="glyphicon-plus">Añadir nuevo libro a la biblioteca</a></p>
+<table class="table">
+	<thead>
+		<tr>
+			<th>Título</th>
+			<th>Autor</th>
+			<th>Estrellas</th>
+			<th>Abierto por última vez</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var book in Model)
+		{
+
+			<tr data-book="true" data-path="@book.Path">
+				<td><a href="#" class="open">@book.Title</a></td>
+				<td>@book.Author</td>
+				<td>@book.Stars</td>
+				<td>@(book.LastOpened.HasValue ? book.LastOpened.Value.ToString("dd/MM/yyyy HH:mm") : "nunca")</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+@section scripts
+	{
+	<script type="text/javascript">
+		const { ipcRenderer } = require("electron");
+
+		$(function () {
+			alert("cargado!");
+			$("#addBook").on("click", function (e) {
+				e.defaultPrevented = true;
+				ipcRenderer.send("select-file");
+			});
+			ipcRenderer.on("select-file-reply", (sender, path) => {
+				document.location.reload();
+			});
+
+			ipcRenderer.on("reload-screen", (sender, path) => {
+				document.location.reload();
+			});
+
+			ipcRenderer.on("read-book", (sender, path) => {
+				document.location.href = "/Home/Read?path=" + encodeURI(path);
+			});
+
+		});
+
+		$("a.open").on("click", function (e) {
+			var tr = $(this).parents("tr:first");
+			var path = tr.attr("data-path");
+			e.defaultPrevented = true;
+			ipcRenderer.send("open-book-menu", path);
+		});
+	</script>
+}

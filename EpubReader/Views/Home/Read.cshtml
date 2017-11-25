@@ -1,0 +1,33 @@
+@model EpubReader.Models.book
+@{ViewData["Title"] = $"Leer epub {Model.Title}";
+}
+
+<h2>@Model.Title, de @Model.Author</h2>
+<div class="jumbotron">
+	<button class="btn btn-primary" id="btnExport">Exportar libro a texto plano</button>
+	<h3>Cap&iacute;tulos</h3>
+	@Html.Partial("_ChaptersList", Model.Chapters)
+</div>
+
+@section scripts
+{
+	<script type="text/javascript">
+		const { ipcRenderer } = require("electron");
+		$(function () {
+
+			$("#btnExport").on("click", function (e) {
+				e.defaultPrevented = true;
+				ipcRenderer.send("export-book");
+			});
+			ipcRenderer.on("export-book-reply", (sender, message) => {
+				if (message === true) {
+					alert("¡Libro exportado satisfactoriamente!");
+				}
+				else {
+					alert(message);
+				}
+			});
+		});
+
+	</script>
+}
